@@ -47,6 +47,17 @@ class InfraManager extends BaseManager {
     document.querySelector('#rack-count').innerHTML = racks.toString();
   }
 
+  public getDataCenterCount(): number {
+    return this.datacenters.length;
+  }
+
+  public getRackCount(): number {
+    let racks: number = 0;
+    this.datacenters.forEach(dc => racks += dc.getRacks().length);
+
+    return racks;
+  }
+
   public getServerCount(): number {
     let servers: number = 0;
 
@@ -121,7 +132,7 @@ class InfraManager extends BaseManager {
     var container = '';
 
     this.datacenters.forEach(dc => {
-      container += `<div class="datacenter-name">${"a"}`;
+      container += `<div class="datacenter-name">${dc.getName()}`;
       container += `<span class="specs">[ Racks: ${dc.getRacks().length} ]</span></div>`;
 
     });
@@ -160,9 +171,41 @@ class InfraManager extends BaseManager {
           container += `<div class="vm empty" onmousedown="Game.eventManager.emit('create_vm', '${server.getName()}')">+</div>`;
           container += `</div>`;
         });
+        container += `<div class="vm empty" onmousedown="Game.eventManager.emit('create_server', '${rack.getName()}')">+</div>`;
+        container += `</div>`;
       });
     });
     document.querySelector('.game .infrastructure .container').innerHTML = container;
+  }
+
+  public getNextDataCenterName(): String | null {
+    let serverNames: Array<String> = [];
+
+    this.datacenters.forEach(dc => serverNames.push(dc.getName()));
+
+    for (let i = 1; i <= 99; i++) {
+      if (serverNames.indexOf('datacenter' + this.zeroPad(i, 2)) === -1) {
+        return `datacenter${this.zeroPad(i, 2).toString()}`;
+      }
+    }
+
+    return null;
+  }
+
+  public getNextRackName(): String | null {
+    let serverNames: Array<String> = [];
+
+    this.datacenters.forEach(dc => {
+      dc.getRacks().forEach(rack => serverNames.push(rack.getName()));
+    });
+
+    for (let i = 1; i <= 99; i++) {
+      if (serverNames.indexOf('rack' + this.zeroPad(i, 2)) === -1) {
+        return `rack${this.zeroPad(i, 2).toString()}`;
+      }
+    }
+
+    return null;
   }
 
   public getNextServerName(): String | null {

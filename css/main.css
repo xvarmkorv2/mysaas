@@ -183,6 +183,11 @@ body {
   padding-bottom: 5px;
 }
 
+.root .game .infrastructure .datacenter-name .specs {
+  padding-left: 10px;
+  color: #636363;
+}
+
 .root .game .infrastructure .server-name .specs {
   padding-left: 10px;
   color: #636363;

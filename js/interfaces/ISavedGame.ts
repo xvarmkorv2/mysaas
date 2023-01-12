@@ -14,10 +14,12 @@ export interface ISavedInfrastructure {
 }
 
 export interface ISavedDataCenter {
+  name: String,
   racks: Array<ISavedRack>
 }
 
 export interface ISavedRack {
+  name: String,
   servers: Array<ISavedServer>
 }
 

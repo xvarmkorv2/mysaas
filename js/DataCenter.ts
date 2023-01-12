@@ -2,18 +2,29 @@ import BaseObject from './BaseObject';
 import Rack from './Rack';
 import Server from './Server';
 import VM from './VM';
+import Game from './Game';
 import { ISavedDataCenter } from './interfaces/ISavedGame';
 
 class DataCenter extends BaseObject {
   private racks: Array<Rack> = [];
 
+  // Saved
+  private name: String = 'datacenter00';
+
+  constructor(game: Game) {
+    super(game);
+    this.name = this.game.infraManager.getNextDataCenterName();
+  }
+
   public save(): ISavedDataCenter {
     return {
+      name: this.name,
       racks: this.racks.map(rack => rack.save())
     }
   }
-  
+
   public load(savedDc: ISavedDataCenter): void {
+    this.name = savedDc.name;
     savedDc.racks.forEach(savedRack => {
       const rack = this.addRack();
       rack.load(savedRack);
@@ -48,6 +59,10 @@ class DataCenter extends BaseObject {
     });
 
     return vms;
+  }
+
+  public getName(): String {
+    return this.name;
   }
 }
 

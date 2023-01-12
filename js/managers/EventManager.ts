@@ -24,6 +24,9 @@ class EventManager extends BaseManager {
       case 'delete_vm':
         this.handleDeleteVm(eventParameter);
         break;
+      case 'create_server':
+        this.handleCreateServer(eventParameter);
+        break;
       case 'create_vm':
         this.handleCreateVm(eventParameter);
         break;
@@ -101,6 +104,25 @@ class EventManager extends BaseManager {
     }
 
     this.game.infraManager.renderInfrastructureView();
+  }
+
+  private handleCreateServer(rackName: String): void {
+    const vmType = prompt('What type of VM do you want to provision?\n\nValid choies:\n  - web\n  - cdn');
+
+    if (!vmType) {
+      return;
+    }
+
+    const dcs = this.game.infraManager.getDataCenters();
+    for (let dci = 0; dci < dcs.length; dci++) {
+      const servers = dcs[dci].getRacks();
+      for (let si = 0; si < servers.length; si++) {
+        if (servers[si].getName() === rackName) {
+          servers[si].addServer()
+          break;
+        }
+      }
+    }
   }
 
   private handleDeleteVm(vmName: String): void {
