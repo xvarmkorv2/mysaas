@@ -422,6 +422,9 @@ System.register("managers/EventManager", ["managers/BaseManager", "VM"], functio
                         case 'delete_vm':
                             this.handleDeleteVm(eventParameter);
                             break;
+                        case 'create_server':
+                            this.handleCreateServer(eventParameter);
+                            break;
                         case 'create_vm':
                             this.handleCreateVm(eventParameter);
                             break;
@@ -498,6 +501,22 @@ System.register("managers/EventManager", ["managers/BaseManager", "VM"], functio
                         }
                     }
                     this.game.infraManager.renderInfrastructureView();
+                };
+                EventManager.prototype.handleCreateServer = function (rackName) {
+                    var vmType = prompt('What type of VM do you want to provision?\n\nValid choies:\n  - web\n  - cdn');
+                    if (!vmType) {
+                        return;
+                    }
+                    var dcs = this.game.infraManager.getDataCenters();
+                    for (var dci = 0; dci < dcs.length; dci++) {
+                        var servers = dcs[dci].getRacks();
+                        for (var si = 0; si < servers.length; si++) {
+                            if (servers[si].getName() === rackName) {
+                                servers[si].addServer();
+                                break;
+                            }
+                        }
+                    }
                 };
                 EventManager.prototype.handleDeleteVm = function (vmName) {
                     var dcs = this.game.infraManager.getDataCenters();
@@ -669,18 +688,23 @@ System.register("Rack", ["BaseObject", "Server"], function (exports_7, context_7
         execute: function () {
             Rack = /** @class */ (function (_super) {
                 __extends(Rack, _super);
-                function Rack() {
-                    var _this = _super !== null && _super.apply(this, arguments) || this;
+                function Rack(game) {
+                    var _this = _super.call(this, game) || this;
                     _this.servers = [];
+                    // Saved
+                    _this.name = 'rack00';
+                    _this.name = _this.game.infraManager.getNextRackName();
                     return _this;
                 }
                 Rack.prototype.save = function () {
                     return {
+                        name: this.name,
                         servers: this.servers.map(function (server) { return server.save(); })
                     };
                 };
                 Rack.prototype.load = function (savedRack) {
                     var _this = this;
+                    this.name = savedRack.name;
                     savedRack.servers.forEach(function (savedServer) {
                         var server = _this.addServer();
                         server.load(savedServer);
@@ -695,6 +719,9 @@ System.register("Rack", ["BaseObject", "Server"], function (exports_7, context_7
                 };
                 Rack.prototype.getServers = function () {
                     return this.servers;
+                };
+                Rack.prototype.getName = function () {
+                    return this.name;
                 };
                 return Rack;
             }(BaseObject_3["default"]));
@@ -718,18 +745,23 @@ System.register("DataCenter", ["BaseObject", "Rack"], function (exports_8, conte
         execute: function () {
             DataCenter = /** @class */ (function (_super) {
                 __extends(DataCenter, _super);
-                function DataCenter() {
-                    var _this = _super !== null && _super.apply(this, arguments) || this;
+                function DataCenter(game) {
+                    var _this = _super.call(this, game) || this;
                     _this.racks = [];
+                    // Saved
+                    _this.name = 'datacenter00';
+                    _this.name = _this.game.infraManager.getNextDataCenterName();
                     return _this;
                 }
                 DataCenter.prototype.save = function () {
                     return {
+                        name: this.name,
                         racks: this.racks.map(function (rack) { return rack.save(); })
                     };
                 };
                 DataCenter.prototype.load = function (savedDc) {
                     var _this = this;
+                    this.name = savedDc.name;
                     savedDc.racks.forEach(function (savedRack) {
                         var rack = _this.addRack();
                         rack.load(savedRack);
@@ -759,6 +791,9 @@ System.register("DataCenter", ["BaseObject", "Rack"], function (exports_8, conte
                         });
                     });
                     return vms;
+                };
+                DataCenter.prototype.getName = function () {
+                    return this.name;
                 };
                 return DataCenter;
             }(BaseObject_4["default"]));
@@ -820,6 +855,14 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                     this.datacenters.forEach(function (dc) { return racks += dc.getRacks().length; });
                     document.querySelector('#rack-count').innerHTML = racks.toString();
                 };
+                InfraManager.prototype.getDataCenterCount = function () {
+                    return this.datacenters.length;
+                };
+                InfraManager.prototype.getRackCount = function () {
+                    var racks = 0;
+                    this.datacenters.forEach(function (dc) { return racks += dc.getRacks().length; });
+                    return racks;
+                };
                 InfraManager.prototype.getServerCount = function () {
                     var servers = 0;
                     this.datacenters.forEach(function (dc) {
@@ -880,7 +923,7 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                 InfraManager.prototype.renderDatacenterView = function () {
                     var container = '';
                     this.datacenters.forEach(function (dc) {
-                        container += "<div class=\"datacenter-name\">".concat("a");
+                        container += "<div class=\"datacenter-name\">".concat(dc.getName());
                         container += "<span class=\"specs\">[ Racks: ".concat(dc.getRacks().length, " ]</span></div>");
                     });
                     container += "</div>";
@@ -918,9 +961,33 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                                 container += "<div class=\"vm empty\" onmousedown=\"Game.eventManager.emit('create_vm', '".concat(server.getName(), "')\">+</div>");
                                 container += "</div>";
                             });
+                            container += "<div class=\"vm empty\" onmousedown=\"Game.eventManager.emit('create_server', '".concat(rack.getName(), "')\">+</div>");
+                            container += "</div>";
                         });
                     });
                     document.querySelector('.game .infrastructure .container').innerHTML = container;
+                };
+                InfraManager.prototype.getNextDataCenterName = function () {
+                    var serverNames = [];
+                    this.datacenters.forEach(function (dc) { return serverNames.push(dc.getName()); });
+                    for (var i = 1; i <= 99; i++) {
+                        if (serverNames.indexOf('datacenter' + this.zeroPad(i, 2)) === -1) {
+                            return "datacenter".concat(this.zeroPad(i, 2).toString());
+                        }
+                    }
+                    return null;
+                };
+                InfraManager.prototype.getNextRackName = function () {
+                    var serverNames = [];
+                    this.datacenters.forEach(function (dc) {
+                        dc.getRacks().forEach(function (rack) { return serverNames.push(rack.getName()); });
+                    });
+                    for (var i = 1; i <= 99; i++) {
+                        if (serverNames.indexOf('rack' + this.zeroPad(i, 2)) === -1) {
+                            return "rack".concat(this.zeroPad(i, 2).toString());
+                        }
+                    }
+                    return null;
                 };
                 InfraManager.prototype.getNextServerName = function () {
                     var serverNames = [];
