@@ -1109,7 +1109,7 @@ System.register("managers/TrafficManager", ["managers/BaseManager"], function (e
                     return methods[Math.floor(Math.random() * methods.length)];
                 };
                 TrafficManager.prototype.getRandomPath = function (methodName) {
-                    var paths = [];
+                    var paths;
                     switch (methodName) {
                         case 'GET':
                             paths = [
