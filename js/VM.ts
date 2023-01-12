@@ -33,6 +33,8 @@ class VM extends BaseObject {
     switch (vmType) {
       case VM_TYPES.WEB_MONOLITH:
         return 'web';
+      case VM_TYPES.CDN:
+        return 'cdn';
       default:
         return 'unknown';
     }
@@ -164,6 +166,8 @@ class VM extends BaseObject {
     switch (this.type) {
       case VM_TYPES.WEB_MONOLITH:
         return route.match(/.*/) !== null;
+      case VM_TYPES.CDN:
+        return route.match(/static/) !== null;
     }
   }
 

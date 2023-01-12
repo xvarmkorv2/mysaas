@@ -1,8 +1,13 @@
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -10,8 +15,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 System.register("managers/BaseManager", [], function (exports_1, context_1) {
     "use strict";
-    var __moduleName = context_1 && context_1.id;
     var BaseManager;
+    var __moduleName = context_1 && context_1.id;
     return {
         setters: [],
         execute: function () {
@@ -27,8 +32,8 @@ System.register("managers/BaseManager", [], function (exports_1, context_1) {
 });
 System.register("BaseObject", [], function (exports_2, context_2) {
     "use strict";
-    var __moduleName = context_2 && context_2.id;
     var BaseObject;
+    var __moduleName = context_2 && context_2.id;
     return {
         setters: [],
         execute: function () {
@@ -53,8 +58,8 @@ System.register("interfaces/ISavedGame", [], function (exports_3, context_3) {
 });
 System.register("Server", ["BaseObject", "VM"], function (exports_4, context_4) {
     "use strict";
-    var __moduleName = context_4 && context_4.id;
     var BaseObject_1, VM_1, MAX_CPU, MAX_MEM, MAX_STORAGE, Server;
+    var __moduleName = context_4 && context_4.id;
     return {
         setters: [
             function (BaseObject_1_1) {
@@ -142,13 +147,13 @@ System.register("Server", ["BaseObject", "VM"], function (exports_4, context_4) 
                     return storage;
                 };
                 Server.prototype.getCpuUsage = function () {
-                    return this.getAllocatedCpus() + "/" + MAX_CPU;
+                    return "".concat(this.getAllocatedCpus(), "/").concat(MAX_CPU);
                 };
                 Server.prototype.getMemoryUsage = function () {
-                    return this.getAllocatedMemory() + "GB/" + MAX_MEM + "GB";
+                    return "".concat(this.getAllocatedMemory(), "GB/").concat(MAX_MEM, "GB");
                 };
                 Server.prototype.getStorageUsage = function () {
-                    return this.getAllocatedStorage() + "GB/" + MAX_STORAGE + "GB";
+                    return "".concat(this.getAllocatedStorage(), "GB/").concat(MAX_STORAGE, "GB");
                 };
                 Server.prototype.getName = function () {
                     return this.name;
@@ -174,8 +179,8 @@ System.register("Server", ["BaseObject", "VM"], function (exports_4, context_4) 
 });
 System.register("VM", ["BaseObject"], function (exports_5, context_5) {
     "use strict";
-    var __moduleName = context_5 && context_5.id;
     var BaseObject_2, VM_TYPES, VM;
+    var __moduleName = context_5 && context_5.id;
     return {
         setters: [
             function (BaseObject_2_1) {
@@ -187,6 +192,7 @@ System.register("VM", ["BaseObject"], function (exports_5, context_5) {
                 VM_TYPES[VM_TYPES["WEB_MONOLITH"] = 0] = "WEB_MONOLITH";
                 VM_TYPES[VM_TYPES["CDN"] = 1] = "CDN";
             })(VM_TYPES || (VM_TYPES = {}));
+            exports_5("VM_TYPES", VM_TYPES);
             VM = /** @class */ (function (_super) {
                 __extends(VM, _super);
                 function VM(game, server) {
@@ -212,6 +218,8 @@ System.register("VM", ["BaseObject"], function (exports_5, context_5) {
                     switch (vmType) {
                         case VM_TYPES.WEB_MONOLITH:
                             return 'web';
+                        case VM_TYPES.CDN:
+                            return 'cdn';
                         default:
                             return 'unknown';
                     }
@@ -322,6 +330,8 @@ System.register("VM", ["BaseObject"], function (exports_5, context_5) {
                     switch (this.type) {
                         case VM_TYPES.WEB_MONOLITH:
                             return route.match(/.*/) !== null;
+                        case VM_TYPES.CDN:
+                            return route.match(/static/) !== null;
                     }
                 };
                 VM.prototype.handleRequest = function (methodName, route) {
@@ -348,7 +358,7 @@ System.register("VM", ["BaseObject"], function (exports_5, context_5) {
                     }
                     var uptimeMs = Date.now() - this.poweredOnAt;
                     var uptimeSecs = uptimeMs / 1000;
-                    return "Uptime: " + uptimeSecs + " seconds";
+                    return "Uptime: ".concat(uptimeSecs, " seconds");
                 };
                 VM.prototype.resetStorage = function () {
                     this.currentStorage = this.startingStorage;
@@ -373,8 +383,8 @@ System.register("VM", ["BaseObject"], function (exports_5, context_5) {
 });
 System.register("managers/EventManager", ["managers/BaseManager"], function (exports_6, context_6) {
     "use strict";
-    var __moduleName = context_6 && context_6.id;
     var BaseManager_1, EventManager;
+    var __moduleName = context_6 && context_6.id;
     return {
         setters: [
             function (BaseManager_1_1) {
@@ -389,7 +399,7 @@ System.register("managers/EventManager", ["managers/BaseManager"], function (exp
                 }
                 EventManager.prototype.emit = function (eventName, eventParameter) {
                     if (eventParameter === void 0) { eventParameter = ''; }
-                    console.log("[emit] " + eventName + " [" + eventParameter + "]");
+                    console.log("[emit] ".concat(eventName, " [").concat(eventParameter, "]"));
                     switch (eventName) {
                         case 'switch_view':
                             this.handleSwitchView(eventParameter);
@@ -531,7 +541,7 @@ System.register("managers/EventManager", ["managers/BaseManager"], function (exp
                                 }
                                 switch (editResource.toLowerCase()) {
                                     case 'cpu':
-                                        var newCpu = prompt("What would you like to set the CPU cores to?\n\nCurrently Allocated: " + vm.getAllocatedCpus());
+                                        var newCpu = prompt("What would you like to set the CPU cores to?\n\nCurrently Allocated: ".concat(vm.getAllocatedCpus()));
                                         var newCpuNumber = Number(newCpu);
                                         if (newCpuNumber > 0) {
                                             var success = vm.getServer().modifyVM(vm, newCpuNumber, vm.getAllocatedMemory(), vm.getAllocatedStorage());
@@ -541,7 +551,7 @@ System.register("managers/EventManager", ["managers/BaseManager"], function (exp
                                         }
                                         break;
                                     case 'memory':
-                                        var newMemory = prompt("What would you like to set the Memory (in GB) to?\n\nCurrently Allocated: " + vm.getAllocatedMemory() + "GB");
+                                        var newMemory = prompt("What would you like to set the Memory (in GB) to?\n\nCurrently Allocated: ".concat(vm.getAllocatedMemory(), "GB"));
                                         var newMemoryNumber = Number(newMemory.toLowerCase().replace('gb', ''));
                                         if (newMemoryNumber > 0) {
                                             var success = vm.getServer().modifyVM(vm, vm.getAllocatedCpus(), newMemoryNumber, vm.getAllocatedStorage());
@@ -551,7 +561,7 @@ System.register("managers/EventManager", ["managers/BaseManager"], function (exp
                                         }
                                         break;
                                     case 'storage':
-                                        var newStorage = prompt("What would you like to set the Storage (in GB) to?\n\nCurrently Allocated: " + vm.getAllocatedStorage() + "GB");
+                                        var newStorage = prompt("What would you like to set the Storage (in GB) to?\n\nCurrently Allocated: ".concat(vm.getAllocatedStorage(), "GB"));
                                         var newStorageNumber = Number(newStorage.toLowerCase().replace('gb', ''));
                                         if (newStorageNumber > 0) {
                                             var success = vm.getServer().modifyVM(vm, vm.getAllocatedCpus(), vm.getAllocatedStorage(), newStorageNumber);
@@ -575,11 +585,11 @@ System.register("managers/EventManager", ["managers/BaseManager"], function (exp
                             if (vms[vmi].getName() === vmName) {
                                 var vm = vms[vmi];
                                 this.handleSwitchView('ssh');
-                                document.querySelector('#view-name').innerHTML = "<i class=\"fas fa-terminal\"></i>SSH: " + vmName;
-                                document.querySelector('.game .ssh .last-login').innerHTML = "Last login: " + vm.getLastSshLogin();
-                                document.querySelector('.game .ssh .uptime').innerHTML = "<br>Uptime is " + vm.getUptime();
+                                document.querySelector('#view-name').innerHTML = "<i class=\"fas fa-terminal\"></i>SSH: ".concat(vmName);
+                                document.querySelector('.game .ssh .last-login').innerHTML = "Last login: ".concat(vm.getLastSshLogin());
+                                document.querySelector('.game .ssh .uptime').innerHTML = "<br>Uptime is ".concat(vm.getUptime());
                                 var actionsContainerHtml = '';
-                                actionsContainerHtml += "<div class=\"action\" onclick=\"Game.eventManager.emit('vm_delete_logs', '" + vm.getName() + "')\">Delete Logs</div>";
+                                actionsContainerHtml += "<div class=\"action\" onclick=\"Game.eventManager.emit('vm_delete_logs', '".concat(vm.getName(), "')\">Delete Logs</div>");
                                 actionsContainerHtml += "<div class=\"action\" onclick=\"Game.eventManager.emit('close_ssh')\">Exit</div>";
                                 document.querySelector('.game .ssh .actions .container').innerHTML = actionsContainerHtml;
                                 vm.updateSshLoginTime();
@@ -632,8 +642,8 @@ System.register("managers/EventManager", ["managers/BaseManager"], function (exp
 });
 System.register("Rack", ["BaseObject", "Server"], function (exports_7, context_7) {
     "use strict";
-    var __moduleName = context_7 && context_7.id;
     var BaseObject_3, Server_1, Rack;
+    var __moduleName = context_7 && context_7.id;
     return {
         setters: [
             function (BaseObject_3_1) {
@@ -681,8 +691,8 @@ System.register("Rack", ["BaseObject", "Server"], function (exports_7, context_7
 });
 System.register("DataCenter", ["BaseObject", "Rack"], function (exports_8, context_8) {
     "use strict";
-    var __moduleName = context_8 && context_8.id;
     var BaseObject_4, Rack_1, DataCenter;
+    var __moduleName = context_8 && context_8.id;
     return {
         setters: [
             function (BaseObject_4_1) {
@@ -745,8 +755,8 @@ System.register("DataCenter", ["BaseObject", "Rack"], function (exports_8, conte
 });
 System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", "VM"], function (exports_9, context_9) {
     "use strict";
-    var __moduleName = context_9 && context_9.id;
     var BaseManager_2, DataCenter_1, VM_2, InfraManager;
+    var __moduleName = context_9 && context_9.id;
     return {
         setters: [
             function (BaseManager_2_1) {
@@ -834,8 +844,8 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                         });
                     });
                     document.querySelector('#cpu-count').innerHTML = cpus.toString();
-                    document.querySelector('#memory-count').innerHTML = memory.toString() + "GB";
-                    document.querySelector('#storage-count').innerHTML = storage.toString() + "GB";
+                    document.querySelector('#memory-count').innerHTML = "".concat(memory.toString(), "GB");
+                    document.querySelector('#storage-count').innerHTML = "".concat(storage.toString(), "GB");
                 };
                 InfraManager.prototype.updateRps = function (successRps, failureRps) {
                     document.querySelector('#success-rps-count').innerHTML = successRps.toString();
@@ -852,7 +862,7 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                         statColor = 'warn';
                     }
                     var current = parseFloat(currentVal.toString()).toFixed(2);
-                    return "<div class=\"stat " + statColor + "\"><strong>" + statName + "</strong>: " + current + statSuffix + " / " + maxVal + statSuffix + "</div>";
+                    return "<div class=\"stat ".concat(statColor, "\"><strong>").concat(statName, "</strong>: ").concat(current).concat(statSuffix, " / ").concat(maxVal).concat(statSuffix, "</div>");
                 };
                 InfraManager.prototype.renderInfrastructureView = function () {
                     var _this = this;
@@ -860,29 +870,29 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                     this.datacenters.forEach(function (dc) {
                         dc.getRacks().forEach(function (rack) {
                             rack.getServers().forEach(function (server) {
-                                container += "<div class=\"server-name\">" + server.getName();
-                                container += "<span class=\"specs\">[ Cores: " + server.getCpuUsage() + ", Mem: " + server.getMemoryUsage() + ", Storage: " + server.getStorageUsage() + " ]</span></div>";
+                                container += "<div class=\"server-name\">".concat(server.getName());
+                                container += "<span class=\"specs\">[ Cores: ".concat(server.getCpuUsage(), ", Mem: ").concat(server.getMemoryUsage(), ", Storage: ").concat(server.getStorageUsage(), " ]</span></div>");
                                 container += "<div class=\"server\">";
                                 server.getVMs().forEach(function (vm) {
                                     container += "<div class=\"vm\">";
-                                    container += "<div class=\"name\">[" + vm.getName() + "]</div>";
-                                    container += "<div class=\"stat " + (vm.getPoweredOn() ? 'good' : 'crit') + "\"><strong>" + (vm.getPoweredOn() ? 'ONLINE' : 'OFFLINE') + "</strong></div>";
+                                    container += "<div class=\"name\">[".concat(vm.getName(), "]</div>");
+                                    container += "<div class=\"stat ".concat(vm.getPoweredOn() ? 'good' : 'crit', "\"><strong>").concat(vm.getPoweredOn() ? 'ONLINE' : 'OFFLINE', "</strong></div>");
                                     container += _this.renderVmStatLine('Load', vm.getCurrentLoad(), vm.getAllocatedCpus());
                                     container += _this.renderVmStatLine('Mem', vm.getCurrentMemory(), vm.getAllocatedMemory(), 'GB');
                                     container += _this.renderVmStatLine('Storage', vm.getCurrentStorage(), vm.getAllocatedStorage(), 'GB');
                                     container += "<div class=\"actions\">";
                                     if (vm.getPoweredOn() === false) {
-                                        container += "<span class=\"link\" onmousedown=\"Game.eventManager.emit('edit_vm', '" + vm.getName() + "')\">Edit</span> | ";
+                                        container += "<span class=\"link\" onmousedown=\"Game.eventManager.emit('edit_vm', '".concat(vm.getName(), "')\">Edit</span> | ");
                                     }
                                     else {
-                                        container += "<span class=\"link\" onmousedown=\"Game.eventManager.emit('ssh_vm', '" + vm.getName() + "')\">SSH</span> | ";
+                                        container += "<span class=\"link\" onmousedown=\"Game.eventManager.emit('ssh_vm', '".concat(vm.getName(), "')\">SSH</span> | ");
                                     }
-                                    container += "<span class=\"link\" onmousedown=\"Game.eventManager.emit('toggle_vm_power', '" + vm.getName() + "')\">Power " + (vm.getPoweredOn() ? 'Down' : 'Up') + "</span> | ";
-                                    container += "<span class=\"link\" onmousedown=\"Game.eventManager.emit('delete_vm', '" + vm.getName() + "')\">Delete</span>";
+                                    container += "<span class=\"link\" onmousedown=\"Game.eventManager.emit('toggle_vm_power', '".concat(vm.getName(), "')\">Power ").concat(vm.getPoweredOn() ? 'Down' : 'Up', "</span> | ");
+                                    container += "<span class=\"link\" onmousedown=\"Game.eventManager.emit('delete_vm', '".concat(vm.getName(), "')\">Delete</span>");
                                     container += "</div>";
                                     container += "</div>";
                                 });
-                                container += "<div class=\"vm empty\" onmousedown=\"Game.eventManager.emit('create_vm', '" + server.getName() + "')\">+</div>";
+                                container += "<div class=\"vm empty\" onmousedown=\"Game.eventManager.emit('create_vm', '".concat(server.getName(), "')\">+</div>");
                                 container += "</div>";
                             });
                         });
@@ -898,7 +908,7 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                     });
                     for (var i = 1; i <= 99; i++) {
                         if (serverNames.indexOf('server' + this.zeroPad(i, 2)) === -1) {
-                            return "server" + this.zeroPad(i, 2).toString();
+                            return "server".concat(this.zeroPad(i, 2).toString());
                         }
                     }
                     return null;
@@ -931,8 +941,8 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
 });
 System.register("managers/TrafficManager", ["managers/BaseManager"], function (exports_10, context_10) {
     "use strict";
-    var __moduleName = context_10 && context_10.id;
     var BaseManager_3, TrafficManager;
+    var __moduleName = context_10 && context_10.id;
     return {
         setters: [
             function (BaseManager_3_1) {
@@ -989,7 +999,7 @@ System.register("managers/TrafficManager", ["managers/BaseManager"], function (e
                     }
                     var div = document.createElement('div');
                     div.className = 'pre';
-                    div.innerHTML = "<span class=\"status-" + (success ? 'good' : 'bad') + "\">" + (success ? '200' : '503') + "</span> <span class=\"handled-by\">" + (success ? vm.getName() : '-') + "</span> " + method + " <span class=\"path\">" + path + "</span>";
+                    div.innerHTML = "<span class=\"status-".concat(success ? 'good' : 'bad', "\">").concat(success ? '200' : '503', "</span> <span class=\"handled-by\">").concat(success ? vm.getName() : '-', "</span> ").concat(method, " <span class=\"path\">").concat(path, "</span>");
                     document.querySelector('.traffic .access-logs .container').appendChild(div);
                     // Cleanup if needed
                     var logsRendered = document.querySelectorAll('.traffic .access-logs .container > div');
@@ -1022,7 +1032,7 @@ System.register("managers/TrafficManager", ["managers/BaseManager"], function (e
                                 '/static/sitemap.xml'
                             ];
                             for (var i = 1; i <= 100; i++) {
-                                paths.push("/static/img/image" + i.toString() + ".png");
+                                paths.push("/static/img/image".concat(i.toString(), ".png"));
                             }
                             break;
                         case 'POST':
@@ -1032,8 +1042,8 @@ System.register("managers/TrafficManager", ["managers/BaseManager"], function (e
                                 '/api/help/request',
                             ];
                             for (var i = 1; i <= 100; i++) {
-                                paths.push("/api/help/" + i.toString() + "/save");
-                                paths.push("/api/help/" + i.toString() + "/edit");
+                                paths.push("/api/help/".concat(i.toString(), "/save"));
+                                paths.push("/api/help/".concat(i.toString(), "/edit"));
                             }
                             break;
                     }
@@ -1047,8 +1057,8 @@ System.register("managers/TrafficManager", ["managers/BaseManager"], function (e
 });
 System.register("ShopItem", [], function (exports_11, context_11) {
     "use strict";
-    var __moduleName = context_11 && context_11.id;
     var SHOP_CATEGORY, ITEM_EFFECT, ShopItem;
+    var __moduleName = context_11 && context_11.id;
     return {
         setters: [],
         execute: function () {
@@ -1152,8 +1162,8 @@ System.register("ShopItem", [], function (exports_11, context_11) {
 });
 System.register("managers/ShopManager", ["managers/BaseManager", "ShopItem"], function (exports_12, context_12) {
     "use strict";
-    var __moduleName = context_12 && context_12.id;
     var BaseManager_4, ShopItem_1, ShopManager;
+    var __moduleName = context_12 && context_12.id;
     return {
         setters: [
             function (BaseManager_4_1) {
@@ -1209,28 +1219,28 @@ System.register("managers/ShopManager", ["managers/BaseManager", "ShopItem"], fu
                         { name: 'marketing', category: ShopItem_1.SHOP_CATEGORY.MARKETING }
                     ];
                     cats.forEach(function (cat) {
-                        var divContainer = document.querySelector(".game .shop .shop-container." + cat.name);
+                        var divContainer = document.querySelector(".game .shop .shop-container.".concat(cat.name));
                         var filteredItems = _this.items.filter(function (item) { return item.isInCategory(cat.category) && item.hasRequirements(); });
                         var divHtml = '';
                         filteredItems.forEach(function (item) {
-                            divHtml += "<div class=\"item " + (item.isPurchased() ? 'purchased' : '') + "\" onclick=\"Game.eventManager.emit('shop_purchase', '" + item.getName() + "')\">";
-                            divHtml += "<div class=\"icon\"><i class=\"" + item.getIcon() + "\"></i></div>";
+                            divHtml += "<div class=\"item ".concat(item.isPurchased() ? 'purchased' : '', "\" onclick=\"Game.eventManager.emit('shop_purchase', '").concat(item.getName(), "')\">");
+                            divHtml += "<div class=\"icon\"><i class=\"".concat(item.getIcon(), "\"></i></div>");
                             divHtml += "<div class=\"about\">";
-                            divHtml += "<div class=\"name\">" + item.getName() + "</div>";
-                            divHtml += "<div class=\"desc\">" + item.getDescription(true) + "</div>";
+                            divHtml += "<div class=\"name\">".concat(item.getName(), "</div>");
+                            divHtml += "<div class=\"desc\">".concat(item.getDescription(true), "</div>");
                             if (item.getRequirements().length > 0) {
                                 divHtml += "<div class=\"req\">Requires [";
                                 item.getRequirements().forEach(function (req) {
-                                    divHtml += "<span>" + req.getName() + "</span>";
+                                    divHtml += "<span>".concat(req.getName(), "</span>");
                                 });
                                 divHtml += "]</div>";
                             }
                             divHtml += "</div>";
-                            divHtml += "<div class=\"actions " + (item.isPurchased() ? 'purchased' : '') + "\">";
+                            divHtml += "<div class=\"actions ".concat(item.isPurchased() ? 'purchased' : '', "\">");
                             if (!item.isPurchased()) {
                                 divHtml += '<div class="purchase">';
                                 divHtml += '<div>BUY</div>';
-                                divHtml += "<div class=\"purchase-amount " + (item.canAfford() ? '' : 'red') + "\">[ $" + item.getCost() + " ]</div>";
+                                divHtml += "<div class=\"purchase-amount ".concat(item.canAfford() ? '' : 'red', "\">[ $").concat(item.getCost(), " ]</div>");
                                 divHtml += '</div>';
                             }
                             else {
@@ -1250,8 +1260,8 @@ System.register("managers/ShopManager", ["managers/BaseManager", "ShopItem"], fu
 });
 System.register("game", ["managers/EventManager", "managers/InfraManager", "managers/TrafficManager", "managers/ShopManager"], function (exports_13, context_13) {
     "use strict";
-    var __moduleName = context_13 && context_13.id;
     var EventManager_1, InfraManager_1, TrafficManager_1, ShopManager_1, Game;
+    var __moduleName = context_13 && context_13.id;
     return {
         setters: [
             function (EventManager_1_1) {
@@ -1332,7 +1342,7 @@ System.register("game", ["managers/EventManager", "managers/InfraManager", "mana
                     this.updateMoney();
                 };
                 Game.prototype.updateMoney = function () {
-                    document.querySelector('#money-count').innerHTML = "$" + this.money.toString();
+                    document.querySelector('#money-count').innerHTML = "$".concat(this.money.toString());
                 };
                 Game.prototype.giveMoneyForHit = function () {
                     this.giveMoney(this.moneyPerHit);
