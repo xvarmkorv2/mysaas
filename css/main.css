@@ -100,6 +100,7 @@ body {
   font-weight: 600;
   text-transform: uppercase;
 }
+
 .root .traffic .access-logs {
   text-align: left;
   flex-grow: 1;
@@ -175,6 +176,10 @@ body {
 }
 
 .root .game .infrastructure .server-name {
+  padding-bottom: 5px;
+}
+
+.root .game .infrastructure .datacenter-name {
   padding-bottom: 5px;
 }
 
@@ -345,6 +350,7 @@ body {
 .root .game .shop .container .shop-section .shop-container .item .about .req {
   margin-top: 5px;
 }
+
 .root .game .shop .container .shop-section .shop-container .item .about .req span {
   color: #dcdc4d;
 }
@@ -381,6 +387,7 @@ body {
   color: #0f0;
   font-size: 30px;
 }
+
 .root .game .shop .container .shop-section .shop-container .item .actions .purchase-amount {
   font-size: 14px;
   color: #0f0;

@@ -15,6 +15,12 @@ class EventManager extends BaseManager {
       case 'toggle_vm_power':
         this.handleToggleVmPower(eventParameter);
         break;
+      case 'delete_dc':
+        //this.handleDeleteDc(eventParameter);
+        break;
+      case 'create_dc':
+        //this.handleCreateDc(eventParameter);
+        break;
       case 'delete_vm':
         this.handleDeleteVm(eventParameter);
         break;
@@ -44,9 +50,9 @@ class EventManager extends BaseManager {
   private handleSwitchView(viewName: String): void {
     // Reset
     const gameViewDivs: NodeListOf<Element> = document.querySelectorAll('.game-view');
-    for (let i = 0; i < gameViewDivs.length; i++){ gameViewDivs[i].classList.add('hidden')}
+    for (let i = 0; i < gameViewDivs.length; i++) { gameViewDivs[i].classList.add('hidden') }
     const viewLinkSpans: NodeListOf<Element> = document.querySelectorAll('.view-links');
-    for (let i = 0; i < viewLinkSpans.length; i++){ viewLinkSpans[i].classList.remove('selected')}
+    for (let i = 0; i < viewLinkSpans.length; i++) { viewLinkSpans[i].classList.remove('selected') }
 
     switch (viewName) {
       case 'infra':
@@ -59,6 +65,7 @@ class EventManager extends BaseManager {
         document.querySelector('.game .dc').classList.remove('hidden');
         document.querySelector('#view-link-dc').classList.add('selected');
         document.querySelector('#view-name').innerHTML = '<i class="fas fa-building"></i>Your DataCenters';
+        this.game.infraManager.renderDatacenterView();
         break;
       case 'bank':
         document.querySelector('.game .bank').classList.remove('hidden');
@@ -143,7 +150,7 @@ class EventManager extends BaseManager {
       for (let vmi = 0; vmi < vms.length; vmi++) {
         if (vms[vmi].getName() === vmName) {
           const vm = vms[vmi];
-          
+
           if (vm.getPoweredOn() === true) {
             alert('You cannot edit a VM that is powered on.');
             return;

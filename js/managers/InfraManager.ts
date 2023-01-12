@@ -117,83 +117,97 @@ class InfraManager extends BaseManager {
     return `<div class="stat ${statColor}"><strong>${statName}</strong>: ${current}${statSuffix} / ${maxVal}${statSuffix}</div>`;
   }
 
-  public renderInfrastructureView(): void {
-    let container = '';
+  public renderDatacenterView(): void {
+    var container = '';
 
     this.datacenters.forEach(dc => {
-      dc.getRacks().forEach(rack => {
-        rack.getServers().forEach(server => {
-          container += `<div class="server-name">${server.getName()}`;
-          container += `<span class="specs">[ Cores: ${server.getCpuUsage()}, Mem: ${server.getMemoryUsage()}, Storage: ${server.getStorageUsage()} ]</span></div>`;
-          container += `<div class="server">`;
-          server.getVMs().forEach(vm => {
-            container += `<div class="vm">`;
-              container += `<div class="name">[${vm.getName()}]</div>`;
-              container += `<div class="stat ${vm.getPoweredOn() ? 'good' : 'crit'}"><strong>${vm.getPoweredOn() ? 'ONLINE' : 'OFFLINE'}</strong></div>`;
-              container += this.renderVmStatLine('Load', vm.getCurrentLoad(), vm.getAllocatedCpus());
-              container += this.renderVmStatLine('Mem', vm.getCurrentMemory(), vm.getAllocatedMemory(), 'GB');
-              container += this.renderVmStatLine('Storage', vm.getCurrentStorage(), vm.getAllocatedStorage(), 'GB');
-              container += `<div class="actions">`;
-                if (vm.getPoweredOn() === false) {
-                  container += `<span class="link" onmousedown="Game.eventManager.emit('edit_vm', '${vm.getName()}')">Edit</span> | `;
-                } else {
-                  container += `<span class="link" onmousedown="Game.eventManager.emit('ssh_vm', '${vm.getName()}')">SSH</span> | `;
-                }
-                container += `<span class="link" onmousedown="Game.eventManager.emit('toggle_vm_power', '${vm.getName()}')">Power ${vm.getPoweredOn() ? 'Down' : 'Up'}</span> | `;
-                container += `<span class="link" onmousedown="Game.eventManager.emit('delete_vm', '${vm.getName()}')">Delete</span>`;
-              container += `</div>`;
-            container += `</div>`;
-          });
-          container += `<div class="vm empty" onmousedown="Game.eventManager.emit('create_vm', '${server.getName()}')">+</div>`;
+      container += `<div class="datacenter-name">${"a"}`;
+      container += `<span class="specs">[ Racks: ${dc.getRacks().length} ]</span></div>`;
+
+    });
+    container += `</div>`;
+  });
+    container += "<div class=\"dc empty\" onmousedown=\"Game.eventManager.emit('create_dc', '" + "OwO" + "')\">+</div>";
+document.querySelector('.game .dc .container').innerHTML = container;
+  }
+
+  public renderInfrastructureView(): void {
+  let container = '';
+
+  this.datacenters.forEach(dc => {
+    dc.getRacks().forEach(rack => {
+      rack.getServers().forEach(server => {
+        container += `<div class="server-name">${server.getName()}`;
+        container += `<span class="specs">[ Cores: ${server.getCpuUsage()}, Mem: ${server.getMemoryUsage()}, Storage: ${server.getStorageUsage()} ]</span></div>`;
+        container += `<div class="server">`;
+        server.getVMs().forEach(vm => {
+          container += `<div class="vm">`;
+          container += `<div class="name">[${vm.getName()}]</div>`;
+          container += `<div class="stat ${vm.getPoweredOn() ? 'good' : 'crit'}"><strong>${vm.getPoweredOn() ? 'ONLINE' : 'OFFLINE'}</strong></div>`;
+          container += this.renderVmStatLine('Load', vm.getCurrentLoad(), vm.getAllocatedCpus());
+          container += this.renderVmStatLine('Mem', vm.getCurrentMemory(), vm.getAllocatedMemory(), 'GB');
+          container += this.renderVmStatLine('Storage', vm.getCurrentStorage(), vm.getAllocatedStorage(), 'GB');
+          container += `<div class="actions">`;
+          if (vm.getPoweredOn() === false) {
+            container += `<span class="link" onmousedown="Game.eventManager.emit('edit_vm', '${vm.getName()}')">Edit</span> | `;
+          } else {
+            container += `<span class="link" onmousedown="Game.eventManager.emit('ssh_vm', '${vm.getName()}')">SSH</span> | `;
+          }
+          container += `<span class="link" onmousedown="Game.eventManager.emit('toggle_vm_power', '${vm.getName()}')">Power ${vm.getPoweredOn() ? 'Down' : 'Up'}</span> | `;
+          container += `<span class="link" onmousedown="Game.eventManager.emit('delete_vm', '${vm.getName()}')">Delete</span>`;
+          container += `</div>`;
           container += `</div>`;
         });
+        container += `<div class="vm empty" onmousedown="Game.eventManager.emit('create_vm', '${server.getName()}')">+</div>`;
+        container += `</div>`;
       });
     });
-    document.querySelector('.game .infrastructure .container').innerHTML = container;
-  }
+  });
+  document.querySelector('.game .infrastructure .container').innerHTML = container;
+}
 
-  public getNextServerName(): String {
-    let serverNames: Array<String> = [];
+  public getNextServerName(): String | null {
+  let serverNames: Array<String> = [];
 
-    this.datacenters.forEach(dc => {
-      dc.getRacks().forEach(rack => {
-        rack.getServers().forEach(server => serverNames.push(server.getName()));
-      });
+  this.datacenters.forEach(dc => {
+    dc.getRacks().forEach(rack => {
+      rack.getServers().forEach(server => serverNames.push(server.getName()));
     });
+  });
 
-    for(let i = 1; i <= 99; i++) {
-      if (serverNames.indexOf('server' + this.zeroPad(i, 2)) === -1) {
-        return `server${this.zeroPad(i, 2).toString()}`;
-      }
+  for (let i = 1; i <= 99; i++) {
+    if (serverNames.indexOf('server' + this.zeroPad(i, 2)) === -1) {
+      return `server${this.zeroPad(i, 2).toString()}`;
     }
-
-    return null;
   }
 
-  public getNextVmName(vmType: VM_TYPES): String {
-    let vmNames: Array<String> = [];
+  return null;
+}
 
-    this.datacenters.forEach(dc => {
-      dc.getRacks().forEach(rack => {
-        rack.getServers().forEach(server => {
-          server.getVMs().forEach(vm => vmNames.push(vm.getName()));
-        });
+  public getNextVmName(vmType: VM_TYPES): String | null {
+  let vmNames: Array<String> = [];
+
+  this.datacenters.forEach(dc => {
+    dc.getRacks().forEach(rack => {
+      rack.getServers().forEach(server => {
+        server.getVMs().forEach(vm => vmNames.push(vm.getName()));
       });
     });
+  });
 
-    for(let i = 1; i <= 99; i++) {
-      if (vmNames.indexOf(VM.getShortType(vmType) + this.zeroPad(i, 2)) === -1) {
-        return VM.getShortType(vmType) + this.zeroPad(i, 2).toString();
-      }
+  for (let i = 1; i <= 99; i++) {
+    if (vmNames.indexOf(VM.getShortType(vmType) + this.zeroPad(i, 2)) === -1) {
+      return VM.getShortType(vmType) + this.zeroPad(i, 2).toString();
     }
-
-    return null;
   }
+
+  return null;
+}
 
   private zeroPad(num: number, places: number): String {
-    const zero: number = places - num.toString().length + 1;
-    return Array(+(zero > 0 && zero)).join("0") + num;
-  }
+  const zero: number = places - num.toString().length + 1;
+  return Array(+(zero > 0 && zero)).join("0") + num;
+}
 }
 
 export default InfraManager
