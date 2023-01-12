@@ -38,7 +38,7 @@ class TrafficManager extends BaseManager {
     });
 
     // Get a random VM and pass the request on to the VM for handling
-    let vm: VM = null;
+    let vm: VM | null = null;
     if (capableVMs.length === 0) {
       success = false;
     } else {
@@ -79,7 +79,7 @@ class TrafficManager extends BaseManager {
   }
 
   private getRandomPath(methodName: String): String {
-    let paths = [];
+    let paths;
 
     switch (methodName) {
       case 'GET':
@@ -92,7 +92,7 @@ class TrafficManager extends BaseManager {
           '/static/favicon.ico',
           '/static/sitemap.xml'
         ];
-        for(let i = 1; i <= 100; i++) {
+        for (let i = 1; i <= 100; i++) {
           paths.push(`/static/img/image${i.toString()}.png`);
         }
         break;
@@ -102,7 +102,7 @@ class TrafficManager extends BaseManager {
           '/api/signup',
           '/api/help/request',
         ];
-        for(let i = 1; i <= 100; i++) {
+        for (let i = 1; i <= 100; i++) {
           paths.push(`/api/help/${i.toString()}/save`);
           paths.push(`/api/help/${i.toString()}/edit`);
         }
