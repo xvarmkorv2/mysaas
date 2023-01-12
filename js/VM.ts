@@ -154,6 +154,23 @@ class VM extends BaseObject {
     return this.currentStorage;
   }
 
+  public canPrioritize(route: String): Boolean {
+    if (this.currentLoad > this.cpus) {
+      return false;
+    } else if (this.currentMemory > this.memory) {
+      return false;
+    } else if (this.currentStorage > this.storage) {
+      return false;
+    }
+
+    switch (this.type) {
+      case VM_TYPES.WEB_MONOLITH:
+        return false;
+      case VM_TYPES.CDN:
+        return route.match(/static/) !== null;
+    }
+  }
+
   public canHandle(route: String): Boolean {
     if (this.currentLoad > this.cpus) {
       return false;
@@ -175,11 +192,11 @@ class VM extends BaseObject {
     if (this.canHandle(route) === false) {
       return false;
     }
-    
+
     this.currentLoad += 0.1;
     this.currentMemory += 0.05;
     this.currentStorage += 0.01;
-    
+
     return true;
   }
 
@@ -225,4 +242,4 @@ class VM extends BaseObject {
 }
 
 export default VM;
-export { VM_TYPES  };
+export { VM_TYPES };

@@ -317,6 +317,23 @@ System.register("VM", ["BaseObject"], function (exports_5, context_5) {
                 VM.prototype.getCurrentStorage = function () {
                     return this.currentStorage;
                 };
+                VM.prototype.canPrioritize = function (route) {
+                    if (this.currentLoad > this.cpus) {
+                        return false;
+                    }
+                    else if (this.currentMemory > this.memory) {
+                        return false;
+                    }
+                    else if (this.currentStorage > this.storage) {
+                        return false;
+                    }
+                    switch (this.type) {
+                        case VM_TYPES.WEB_MONOLITH:
+                            return false;
+                        case VM_TYPES.CDN:
+                            return route.match(/static/) !== null;
+                    }
+                };
                 VM.prototype.canHandle = function (route) {
                     if (this.currentLoad > this.cpus) {
                         return false;
@@ -503,10 +520,6 @@ System.register("managers/EventManager", ["managers/BaseManager", "VM"], functio
                     this.game.infraManager.renderInfrastructureView();
                 };
                 EventManager.prototype.handleCreateServer = function (rackName) {
-                    var vmType = prompt('What type of VM do you want to provision?\n\nValid choies:\n  - web\n  - cdn');
-                    if (!vmType) {
-                        return;
-                    }
                     var dcs = this.game.infraManager.getDataCenters();
                     for (var dci = 0; dci < dcs.length; dci++) {
                         var servers = dcs[dci].getRacks();
@@ -961,7 +974,7 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                                 container += "<div class=\"vm empty\" onmousedown=\"Game.eventManager.emit('create_vm', '".concat(server.getName(), "')\">+</div>");
                                 container += "</div>";
                             });
-                            container += "<div class=\"vm empty\" onmousedown=\"Game.eventManager.emit('create_server', '".concat(rack.getName(), "')\">+</div>");
+                            container += "<div class=\"rack empty\" onmousedown=\"Game.eventManager.emit('create_server', '".concat(rack.getName(), "')\">+</div>");
                             container += "</div>";
                         });
                     });
@@ -1062,16 +1075,29 @@ System.register("managers/TrafficManager", ["managers/BaseManager"], function (e
                     // Compile a list of VMs capable of handling this route
                     // We will favor microservices over web monolith where
                     // appropriate.
+                    var allVMs = [];
                     var capableVMs = [];
                     this.game.infraManager.getDataCenters().forEach(function (dc) {
                         dc.getAllVMs().forEach(function (vm) {
+                            allVMs.push(vm);
+                        });
+                    });
+                    allVMs.forEach(function (vm) {
+                        if (vm.getPoweredOn() === true) {
+                            if (vm.canPrioritize(path) === true && vm.canHandle(path) === true) {
+                                capableVMs.push(vm);
+                            }
+                        }
+                    });
+                    if (capableVMs.length === 0) {
+                        allVMs.forEach(function (vm) {
                             if (vm.getPoweredOn() === true) {
                                 if (vm.canHandle(path) === true) {
                                     capableVMs.push(vm);
                                 }
                             }
                         });
-                    });
+                    }
                     // Get a random VM and pass the request on to the VM for handling
                     var vm = null;
                     if (capableVMs.length === 0) {

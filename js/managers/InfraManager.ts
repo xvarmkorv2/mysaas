@@ -134,7 +134,6 @@ class InfraManager extends BaseManager {
     this.datacenters.forEach(dc => {
       container += `<div class="datacenter-name">${dc.getName()}`;
       container += `<span class="specs">[ Racks: ${dc.getRacks().length} ]</span></div>`;
-
     });
     container += `</div>`;
     container += "<div class=\"dc empty\" onmousedown=\"Game.eventManager.emit('create_dc', '" + "OwO" + "')\">+</div>";
@@ -171,7 +170,7 @@ class InfraManager extends BaseManager {
           container += `<div class="vm empty" onmousedown="Game.eventManager.emit('create_vm', '${server.getName()}')">+</div>`;
           container += `</div>`;
         });
-        container += `<div class="vm empty" onmousedown="Game.eventManager.emit('create_server', '${rack.getName()}')">+</div>`;
+        container += `<div class="rack empty" onmousedown="Game.eventManager.emit('create_server', '${rack.getName()}')">+</div>`;
         container += `</div>`;
       });
     });

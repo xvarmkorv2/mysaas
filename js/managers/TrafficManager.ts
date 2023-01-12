@@ -26,16 +26,30 @@ class TrafficManager extends BaseManager {
     // Compile a list of VMs capable of handling this route
     // We will favor microservices over web monolith where
     // appropriate.
+    let allVMs: Array<VM> = [];
     let capableVMs: Array<VM> = [];
     this.game.infraManager.getDataCenters().forEach(dc => {
       dc.getAllVMs().forEach(vm => {
+        allVMs.push(vm);
+      });
+    });
+    allVMs.forEach(vm => {
+      if (vm.getPoweredOn() === true) {
+        if (vm.canPrioritize(path) === true && vm.canHandle(path) === true) {
+          capableVMs.push(vm);
+        }
+      }
+    });
+
+    if (capableVMs.length === 0) {
+      allVMs.forEach(vm => {
         if (vm.getPoweredOn() === true) {
           if (vm.canHandle(path) === true) {
             capableVMs.push(vm);
           }
         }
       });
-    });
+    }
 
     // Get a random VM and pass the request on to the VM for handling
     let vm: VM | null = null;

@@ -107,12 +107,6 @@ class EventManager extends BaseManager {
   }
 
   private handleCreateServer(rackName: String): void {
-    const vmType = prompt('What type of VM do you want to provision?\n\nValid choies:\n  - web\n  - cdn');
-
-    if (!vmType) {
-      return;
-    }
-
     const dcs = this.game.infraManager.getDataCenters();
     for (let dci = 0; dci < dcs.length; dci++) {
       const servers = dcs[dci].getRacks();
