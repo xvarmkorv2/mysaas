@@ -117,7 +117,7 @@ class EventManager extends BaseManager {
   }
 
   private handleCreateVm(serverName: String): void {
-    const vmType = prompt('What type of VM do you want to provision?\n\nValid choies:\n  - web');
+    const vmType = prompt('What type of VM do you want to provision?\n\nValid choies:\n  - web\n  - cdn');
 
     if (!vmType) {
       return;
@@ -130,7 +130,10 @@ class EventManager extends BaseManager {
         if (servers[si].getName() === serverName) {
           switch (vmType.toLowerCase()) {
             case 'web':
-              servers[si].createVM(1, 1, 10, 0);
+              servers[si].createVM(1, 1, 10, VM_TYPES.WEB_MONOLITH);
+              break;
+            case 'cdn':
+              servers[si].createVM(1, 1, 15, VM_TYPES.CDN);
               break;
             default:
               alert('You have entered an invalid type. Nothing was created.');

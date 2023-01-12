@@ -381,14 +381,17 @@ System.register("VM", ["BaseObject"], function (exports_5, context_5) {
         }
     };
 });
-System.register("managers/EventManager", ["managers/BaseManager"], function (exports_6, context_6) {
+System.register("managers/EventManager", ["managers/BaseManager", "VM"], function (exports_6, context_6) {
     "use strict";
-    var BaseManager_1, EventManager;
+    var BaseManager_1, VM_2, EventManager;
     var __moduleName = context_6 && context_6.id;
     return {
         setters: [
             function (BaseManager_1_1) {
                 BaseManager_1 = BaseManager_1_1;
+            },
+            function (VM_2_1) {
+                VM_2 = VM_2_1;
             }
         ],
         execute: function () {
@@ -409,6 +412,12 @@ System.register("managers/EventManager", ["managers/BaseManager"], function (exp
                             break;
                         case 'toggle_vm_power':
                             this.handleToggleVmPower(eventParameter);
+                            break;
+                        case 'delete_dc':
+                            //this.handleDeleteDc(eventParameter);
+                            break;
+                        case 'create_dc':
+                            //this.handleCreateDc(eventParameter);
                             break;
                         case 'delete_vm':
                             this.handleDeleteVm(eventParameter);
@@ -456,6 +465,7 @@ System.register("managers/EventManager", ["managers/BaseManager"], function (exp
                             document.querySelector('.game .dc').classList.remove('hidden');
                             document.querySelector('#view-link-dc').classList.add('selected');
                             document.querySelector('#view-name').innerHTML = '<i class="fas fa-building"></i>Your DataCenters';
+                            this.game.infraManager.renderDatacenterView();
                             break;
                         case 'bank':
                             document.querySelector('.game .bank').classList.remove('hidden');
@@ -502,7 +512,7 @@ System.register("managers/EventManager", ["managers/BaseManager"], function (exp
                     }
                 };
                 EventManager.prototype.handleCreateVm = function (serverName) {
-                    var vmType = prompt('What type of VM do you want to provision?\n\nValid choies:\n  - web');
+                    var vmType = prompt('What type of VM do you want to provision?\n\nValid choies:\n  - web\n  - cdn');
                     if (!vmType) {
                         return;
                     }
@@ -513,7 +523,10 @@ System.register("managers/EventManager", ["managers/BaseManager"], function (exp
                             if (servers[si].getName() === serverName) {
                                 switch (vmType.toLowerCase()) {
                                     case 'web':
-                                        servers[si].createVM(1, 1, 10, 0);
+                                        servers[si].createVM(1, 1, 10, VM_2.VM_TYPES.WEB_MONOLITH);
+                                        break;
+                                    case 'cdn':
+                                        servers[si].createVM(1, 1, 15, VM_2.VM_TYPES.CDN);
                                         break;
                                     default:
                                         alert('You have entered an invalid type. Nothing was created.');
@@ -755,7 +768,7 @@ System.register("DataCenter", ["BaseObject", "Rack"], function (exports_8, conte
 });
 System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", "VM"], function (exports_9, context_9) {
     "use strict";
-    var BaseManager_2, DataCenter_1, VM_2, InfraManager;
+    var BaseManager_2, DataCenter_1, VM_3, InfraManager;
     var __moduleName = context_9 && context_9.id;
     return {
         setters: [
@@ -765,8 +778,8 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
             function (DataCenter_1_1) {
                 DataCenter_1 = DataCenter_1_1;
             },
-            function (VM_2_1) {
-                VM_2 = VM_2_1;
+            function (VM_3_1) {
+                VM_3 = VM_3_1;
             }
         ],
         execute: function () {
@@ -864,6 +877,16 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                     var current = parseFloat(currentVal.toString()).toFixed(2);
                     return "<div class=\"stat ".concat(statColor, "\"><strong>").concat(statName, "</strong>: ").concat(current).concat(statSuffix, " / ").concat(maxVal).concat(statSuffix, "</div>");
                 };
+                InfraManager.prototype.renderDatacenterView = function () {
+                    var container = '';
+                    this.datacenters.forEach(function (dc) {
+                        container += "<div class=\"datacenter-name\">".concat("a");
+                        container += "<span class=\"specs\">[ Racks: ".concat(dc.getRacks().length, " ]</span></div>");
+                    });
+                    container += "</div>";
+                    container += "<div class=\"dc empty\" onmousedown=\"Game.eventManager.emit('create_dc', '" + "OwO" + "')\">+</div>";
+                    document.querySelector('.game .dc .container').innerHTML = container;
+                };
                 InfraManager.prototype.renderInfrastructureView = function () {
                     var _this = this;
                     var container = '';
@@ -923,8 +946,8 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                         });
                     });
                     for (var i = 1; i <= 99; i++) {
-                        if (vmNames.indexOf(VM_2["default"].getShortType(vmType) + this.zeroPad(i, 2)) === -1) {
-                            return VM_2["default"].getShortType(vmType) + this.zeroPad(i, 2).toString();
+                        if (vmNames.indexOf(VM_3["default"].getShortType(vmType) + this.zeroPad(i, 2)) === -1) {
+                            return VM_3["default"].getShortType(vmType) + this.zeroPad(i, 2).toString();
                         }
                     }
                     return null;
