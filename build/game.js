@@ -93,19 +93,21 @@ System.register("Server", ["BaseObject", "VM"], function (exports_4, context_4) 
                     var _this = this;
                     this.name = savedServer.name;
                     savedServer.vms.forEach(function (savedVm) {
-                        var vm = _this.createVM(savedVm.cpus, savedVm.memory, savedVm.storage, savedVm.type);
+                        var vm = _this.createVM(savedVm.cpus, savedVm.memory, savedVm.storage, savedVm.type, true);
                         vm.load(savedVm);
                     });
                 };
-                Server.prototype.createVM = function (cpus, memory, storage, type) {
-                    if ((this.getAllocatedCpus() + cpus) > MAX_CPU) {
-                        return null;
-                    }
-                    else if ((this.getAllocatedMemory() + memory) > MAX_MEM) {
-                        return null;
-                    }
-                    else if ((this.getAllocatedStorage() + storage) > MAX_STORAGE) {
-                        return null;
+                Server.prototype.createVM = function (cpus, memory, storage, type, CheckOverride) {
+                    if (!CheckOverride) {
+                        if ((this.getAllocatedCpus() + cpus) > this.game.getMaxCPU()) {
+                            return null;
+                        }
+                        else if ((this.getAllocatedMemory() + memory) > this.game.getMaxMemory()) {
+                            return null;
+                        }
+                        else if ((this.getAllocatedStorage() + storage) > this.game.getMaxStorage()) {
+                            return null;
+                        }
                     }
                     var vm = new VM_1["default"](this.game, this);
                     this.vms.push(vm);
@@ -120,7 +122,9 @@ System.register("Server", ["BaseObject", "VM"], function (exports_4, context_4) 
                     var newAllocatedCpus = (this.getAllocatedCpus() - vm.getAllocatedCpus()) + cpus;
                     var newAllocatedMemory = (this.getAllocatedMemory() - vm.getAllocatedMemory()) + memory;
                     var newAllocatedStorage = (this.getAllocatedStorage() - vm.getAllocatedStorage()) + storage;
-                    if (newAllocatedCpus > MAX_CPU || newAllocatedMemory > MAX_MEM || newAllocatedStorage > MAX_STORAGE) {
+                    if (newAllocatedCpus > this.game.getMaxCPU() ||
+                        newAllocatedMemory > this.game.getMaxMemory() ||
+                        newAllocatedStorage > this.game.getMaxStorage()) {
                         return false;
                     }
                     vm.setResourceLimits(cpus, memory, storage);
@@ -147,13 +151,13 @@ System.register("Server", ["BaseObject", "VM"], function (exports_4, context_4) 
                     return storage;
                 };
                 Server.prototype.getCpuUsage = function () {
-                    return "".concat(this.getAllocatedCpus(), "/").concat(MAX_CPU);
+                    return "".concat(this.getAllocatedCpus(), "/").concat(this.game.getMaxCPU());
                 };
                 Server.prototype.getMemoryUsage = function () {
-                    return "".concat(this.getAllocatedMemory(), "GB/").concat(MAX_MEM, "GB");
+                    return "".concat(this.getAllocatedMemory(), "GB/").concat(this.game.getMaxMemory(), "GB");
                 };
                 Server.prototype.getStorageUsage = function () {
-                    return "".concat(this.getAllocatedStorage(), "GB/").concat(MAX_STORAGE, "GB");
+                    return "".concat(this.getAllocatedStorage(), "GB/").concat(this.game.getMaxStorage(), "GB");
                 };
                 Server.prototype.getName = function () {
                     return this.name;
@@ -430,9 +434,6 @@ System.register("managers/EventManager", ["managers/BaseManager", "VM"], functio
                         case 'toggle_vm_power':
                             this.handleToggleVmPower(eventParameter);
                             break;
-                        case 'delete_dc':
-                            //this.handleDeleteDc(eventParameter);
-                            break;
                         case 'create_dc':
                             //this.handleCreateDc(eventParameter);
                             break;
@@ -519,6 +520,18 @@ System.register("managers/EventManager", ["managers/BaseManager", "VM"], functio
                     }
                     this.game.infraManager.renderInfrastructureView();
                 };
+                EventManager.prototype.handleCreateDatacenter = function (rackName) {
+                    this.game.infraManager.addDataCenter();
+                };
+                EventManager.prototype.handleCreateRack = function (dataCenterName) {
+                    var dcs = this.game.infraManager.getDataCenters();
+                    for (var dci = 0; dci < dcs.length; dci++) {
+                        if (dcs[dci].getName() === dataCenterName) {
+                            dcs[dci].addRack();
+                            break;
+                        }
+                    }
+                };
                 EventManager.prototype.handleCreateServer = function (rackName) {
                     var dcs = this.game.infraManager.getDataCenters();
                     for (var dci = 0; dci < dcs.length; dci++) {
@@ -555,10 +568,10 @@ System.register("managers/EventManager", ["managers/BaseManager", "VM"], functio
                             if (servers[si].getName() === serverName) {
                                 switch (vmType.toLowerCase()) {
                                     case 'web':
-                                        servers[si].createVM(1, 1, 10, VM_2.VM_TYPES.WEB_MONOLITH);
+                                        servers[si].createVM(1, 1, 10, VM_2.VM_TYPES.WEB_MONOLITH, false);
                                         break;
                                     case 'cdn':
-                                        servers[si].createVM(1, 1, 15, VM_2.VM_TYPES.CDN);
+                                        servers[si].createVM(1.5, 1, 15, VM_2.VM_TYPES.CDN, false);
                                         break;
                                     default:
                                         alert('You have entered an invalid type. Nothing was created.');
@@ -988,7 +1001,7 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                             return "datacenter".concat(this.zeroPad(i, 2).toString());
                         }
                     }
-                    return null;
+                    return "null";
                 };
                 InfraManager.prototype.getNextRackName = function () {
                     var serverNames = [];
@@ -1000,7 +1013,7 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                             return "rack".concat(this.zeroPad(i, 2).toString());
                         }
                     }
-                    return null;
+                    return "null";
                 };
                 InfraManager.prototype.getNextServerName = function () {
                     var serverNames = [];
@@ -1014,7 +1027,7 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                             return "server".concat(this.zeroPad(i, 2).toString());
                         }
                     }
-                    return null;
+                    return "null";
                 };
                 InfraManager.prototype.getNextVmName = function (vmType) {
                     var vmNames = [];
@@ -1030,7 +1043,7 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                             return VM_3["default"].getShortType(vmType) + this.zeroPad(i, 2).toString();
                         }
                     }
-                    return null;
+                    return "null";
                 };
                 InfraManager.prototype.zeroPad = function (num, places) {
                     var zero = places - num.toString().length + 1;
@@ -1181,10 +1194,15 @@ System.register("ShopItem", [], function (exports_11, context_11) {
             (function (SHOP_CATEGORY) {
                 SHOP_CATEGORY[SHOP_CATEGORY["GENERAL"] = 0] = "GENERAL";
                 SHOP_CATEGORY[SHOP_CATEGORY["MARKETING"] = 1] = "MARKETING";
+                SHOP_CATEGORY[SHOP_CATEGORY["COMPONENTS"] = 2] = "COMPONENTS";
+                SHOP_CATEGORY[SHOP_CATEGORY["COMPONENTS2"] = 3] = "COMPONENTS2";
             })(SHOP_CATEGORY || (SHOP_CATEGORY = {}));
             exports_11("SHOP_CATEGORY", SHOP_CATEGORY);
             (function (ITEM_EFFECT) {
                 ITEM_EFFECT[ITEM_EFFECT["INCREASE_TRAFFIC"] = 0] = "INCREASE_TRAFFIC";
+                ITEM_EFFECT[ITEM_EFFECT["INCREASE_CPU"] = 1] = "INCREASE_CPU";
+                ITEM_EFFECT[ITEM_EFFECT["INCREASE_MEMORY"] = 2] = "INCREASE_MEMORY";
+                ITEM_EFFECT[ITEM_EFFECT["INCREASE_STORAGE"] = 3] = "INCREASE_STORAGE";
             })(ITEM_EFFECT || (ITEM_EFFECT = {}));
             exports_11("ITEM_EFFECT", ITEM_EFFECT);
             ShopItem = /** @class */ (function () {
@@ -1267,6 +1285,15 @@ System.register("ShopItem", [], function (exports_11, context_11) {
                             case 'traffic':
                                 _this.manager.game.increaseTrafficPerSec(Number(effectValue.replace('+', '')));
                                 break;
+                            case 'cpu':
+                                _this.manager.game.increaseServerCPU(Number(effectValue.replace('+', '')));
+                                break;
+                            case 'ram':
+                                _this.manager.game.increaseServerMemory(Number(effectValue.replace('+', '')));
+                                break;
+                            case 'storage':
+                                _this.manager.game.increaseServerStorage(Number(effectValue.replace('+', '')));
+                                break;
                         }
                     });
                 };
@@ -1313,12 +1340,30 @@ System.register("managers/ShopManager", ["managers/BaseManager", "ShopItem"], fu
                     });
                 };
                 ShopManager.prototype.populateItems = function () {
+                    var eth = "fa-solid fa-ethernet";
                     // General
                     this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.GENERAL, 'CDN', 500, 'Research how to create a [CDN] vm type. This will handle all [/static] routes.', 'fab fa-maxcdn', '', []));
                     // Marketing
                     this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.MARKETING, 'Tell My Friends I', 100, 'You tell your friends about your new website and gain [+1/s] in traffic.', 'fas fa-users', 'traffic:+1', []));
                     this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.MARKETING, 'Tell My Friends II', 1000, 'You post about your website on social media and gain [+5/s] in traffic.', 'fas fa-users', 'traffic:+5', ['Tell My Friends I']));
                     this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.MARKETING, 'Podcast I', 2000, 'You advertise on a podcast and gain [+15/s] in traffic.', 'fas fa-podcast', 'traffic:+15', []));
+                    // Components
+                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS, 'New CPUs', 4000, 'This upgrade allows you to have 4 more cores.', 'fas fa-microchip', 'cpu:+4', []));
+                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS, 'New CPUs II', 20000, 'This upgrade allows you to have 20 more cores.', 'fas fa-microchip', 'cpu:+20', ['New CPUs']));
+                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS, 'New CPUs III', 32000, 'This upgrade allows you to have 32 more cores.', 'fas fa-microchip', 'cpu:+32', ['New CPUs II']));
+                    //internet
+                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS, 'Better ISP', 5000, 'This upgrade increases upload and Download speed faster, making recieving traffic faster.', eth, 'traffic:+2', []));
+                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS, 'Ethernet', 7000, 'This upgrade increases upload and Download speed faster, making recieving traffic faster.', eth, 'traffic:+6', ['Better ISP']));
+                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS, 'Fiberoptic', 9000, 'This upgrade increases upload and Download speed faster, making recieving traffic faster.', eth, 'traffic:+12', ['Ethernet']));
+                    //components II
+                    //memory
+                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS2, 'More Sticks of RAM', 12000, 'This upgrade allows you to have a max of 64gbs of ram.', 'fas fa-microchip', 'ram:+32', ['New CPUs III']));
+                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS2, 'More Sticks of RAM II', 24000, 'This upgrade allows you to have a max of 128gbs of ram', 'fas fa-microchip', 'ram:+64', ['More Sticks of RAM']));
+                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS2, 'More Sticks of RAM III', 48000, 'This upgrade allows you to have a max of 256gbs of ram', 'fas fa-microchip', 'ram:+128', ['More Sticks of RAM II']));
+                    //storage
+                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS2, 'More Hardrives', 24000, 'This upgrade allows you to have a max of 200gbs of storage.', 'fas fa-microchip', 'storage:+100', ['More Sticks of RAM III']));
+                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS2, 'More Hardrives II', 12000, 'This upgrade allows you to have a max of 400gbs of storage.', 'fas fa-microchip', 'storage:+200', ['More Hardrives']));
+                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS2, 'More Hardrives III', 16000, 'This upgrade allows you to have a max of 1000gbs of storage.', 'fas fa-microchip', 'storage:+600', ['More Hardrives II']));
                 };
                 ShopManager.prototype.getItem = function (itemName) {
                     for (var i = 0; i < this.items.length; i++) {
@@ -1332,7 +1377,9 @@ System.register("managers/ShopManager", ["managers/BaseManager", "ShopItem"], fu
                     var _this = this;
                     var cats = [
                         { name: 'general', category: ShopItem_1.SHOP_CATEGORY.GENERAL },
-                        { name: 'marketing', category: ShopItem_1.SHOP_CATEGORY.MARKETING }
+                        { name: 'marketing', category: ShopItem_1.SHOP_CATEGORY.MARKETING },
+                        { name: 'components', category: ShopItem_1.SHOP_CATEGORY.COMPONENTS },
+                        { name: 'components2', category: ShopItem_1.SHOP_CATEGORY.COMPONENTS2 }
                     ];
                     cats.forEach(function (cat) {
                         var divContainer = document.querySelector(".game .shop .shop-container.".concat(cat.name));
@@ -1401,6 +1448,9 @@ System.register("game", ["managers/EventManager", "managers/InfraManager", "mana
                     this.money = 0;
                     this.moneyPerHit = 1;
                     this.trafficPerSec = 0;
+                    this.MaxCPU = 8;
+                    this.MaxMemory = 32;
+                    this.MaxStorage = 100;
                     // Private
                     this.saveTimer = null;
                     this.trafficTimer = null;
@@ -1441,7 +1491,7 @@ System.register("game", ["managers/EventManager", "managers/InfraManager", "mana
                     var dc = this.infraManager.addDataCenter();
                     var rack = dc.addRack();
                     var server = rack.addServer();
-                    var vm = server.createVM(1, 1, 10, 0);
+                    var vm = server.createVM(1, 1, 10, 0, true);
                     vm.setPoweredOn(true);
                 };
                 Game.prototype.increaseHitCounter = function (amount) {
@@ -1466,8 +1516,26 @@ System.register("game", ["managers/EventManager", "managers/InfraManager", "mana
                 Game.prototype.getMoney = function () {
                     return this.money;
                 };
+                Game.prototype.getMaxCPU = function () {
+                    return this.MaxCPU;
+                };
+                Game.prototype.getMaxMemory = function () {
+                    return this.MaxMemory;
+                };
+                Game.prototype.getMaxStorage = function () {
+                    return this.MaxStorage;
+                };
                 Game.prototype.increaseTrafficPerSec = function (amount) {
                     this.trafficPerSec += amount;
+                };
+                Game.prototype.increaseServerCPU = function (amount) {
+                    this.MaxCPU += amount;
+                };
+                Game.prototype.increaseServerMemory = function (amount) {
+                    this.MaxMemory += amount;
+                };
+                Game.prototype.increaseServerStorage = function (amount) {
+                    this.MaxStorage += amount;
                 };
                 Game.prototype.generateTraffic = function () {
                     if (this.trafficPerSec === 0) {

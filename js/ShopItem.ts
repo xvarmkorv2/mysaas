@@ -4,11 +4,16 @@ import { ISavedShopItem } from "./interfaces/ISavedGame";
 
 export enum SHOP_CATEGORY {
   GENERAL,
-  MARKETING
+  MARKETING,
+  COMPONENTS,
+  COMPONENTS2,
 }
 
 export enum ITEM_EFFECT {
-  INCREASE_TRAFFIC
+  INCREASE_TRAFFIC,
+  INCREASE_CPU,
+  INCREASE_MEMORY,
+  INCREASE_STORAGE
 }
 
 export default class ShopItem {
@@ -46,7 +51,7 @@ export default class ShopItem {
 
   private parseRequirements(requirements: Array<String>): void {
     requirements.forEach(req => {
-      const item: ShopItem = this.manager.getItem(req);
+      const item: ShopItem | null = this.manager.getItem(req);
       if (item instanceof ShopItem) {
         this.requirements.push(item);
       }
@@ -87,7 +92,7 @@ export default class ShopItem {
         return false;
       }
     }
-    
+
     return true;
   }
 
@@ -111,6 +116,15 @@ export default class ShopItem {
       switch (effectName) {
         case 'traffic':
           this.manager.game.increaseTrafficPerSec(Number(effectValue.replace('+', '')));
+          break;
+        case 'cpu':
+          this.manager.game.increaseServerCPU(Number(effectValue.replace('+', '')))
+          break;
+        case 'ram':
+          this.manager.game.increaseServerMemory(Number(effectValue.replace('+', '')))
+          break;
+        case 'storage':
+          this.manager.game.increaseServerStorage(Number(effectValue.replace('+', '')))
           break;
       }
     });

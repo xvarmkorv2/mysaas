@@ -15,9 +15,6 @@ class EventManager extends BaseManager {
       case 'toggle_vm_power':
         this.handleToggleVmPower(eventParameter);
         break;
-      case 'delete_dc':
-        //this.handleDeleteDc(eventParameter);
-        break;
       case 'create_dc':
         //this.handleCreateDc(eventParameter);
         break;
@@ -106,6 +103,20 @@ class EventManager extends BaseManager {
     this.game.infraManager.renderInfrastructureView();
   }
 
+  private handleCreateDatacenter(rackName: String): void {
+    this.game.infraManager.addDataCenter()
+  }
+
+  private handleCreateRack(dataCenterName: String): void {
+    const dcs = this.game.infraManager.getDataCenters();
+    for (let dci = 0; dci < dcs.length; dci++) {
+      if (dcs[dci].getName() === dataCenterName) {
+        dcs[dci].addRack()
+        break;
+      }
+    }
+  }
+
   private handleCreateServer(rackName: String): void {
     const dcs = this.game.infraManager.getDataCenters();
     for (let dci = 0; dci < dcs.length; dci++) {
@@ -146,10 +157,10 @@ class EventManager extends BaseManager {
         if (servers[si].getName() === serverName) {
           switch (vmType.toLowerCase()) {
             case 'web':
-              servers[si].createVM(1, 1, 10, VM_TYPES.WEB_MONOLITH);
+              servers[si].createVM(1, 1, 10, VM_TYPES.WEB_MONOLITH, false);
               break;
             case 'cdn':
-              servers[si].createVM(1, 1, 15, VM_TYPES.CDN);
+              servers[si].createVM(1.5, 1, 15, VM_TYPES.CDN, false);
               break;
             default:
               alert('You have entered an invalid type. Nothing was created.');

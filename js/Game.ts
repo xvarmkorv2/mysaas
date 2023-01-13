@@ -3,6 +3,8 @@ import InfraManager from './managers/InfraManager';
 import TrafficManager from './managers/TrafficManager';
 import ISavedGame from './interfaces/ISavedGame';
 import ShopManager from './managers/ShopManager';
+import VM from './VM';
+
 
 class Game {
   // Managers
@@ -16,13 +18,16 @@ class Game {
   private money: number = 0;
   private moneyPerHit: number = 1;
   private trafficPerSec: number = 0;
+  private MaxCPU: number = 8;
+  private MaxMemory: number = 32;
+  private MaxStorage: number = 100;
 
   // Private
   private saveTimer: any = null;
   private trafficTimer: any = null;
   private partialTrafficCounter: number = 0;
 
-  constructor () {
+  constructor() {
     this.eventManager = new EventManager(this);
     this.infraManager = new InfraManager(this);
     this.trafficManager = new TrafficManager(this);
@@ -49,7 +54,7 @@ class Game {
 
   public loadSavedGame(): void {
     if (localStorage.getItem('savedGame') !== null) {
-      const savedGame: ISavedGame = JSON.parse(localStorage.getItem('savedGame'));
+      const savedGame: ISavedGame = JSON.parse(localStorage.getItem('savedGame') as string);
       this.increaseHitCounter(savedGame.visitCount);
       this.giveMoney(savedGame.money);
       this.moneyPerHit = savedGame.moneyPerHit;
@@ -64,7 +69,7 @@ class Game {
     const dc = this.infraManager.addDataCenter();
     const rack = dc.addRack();
     const server = rack.addServer();
-    const vm = server.createVM(1, 1, 10, 0);
+    const vm = server.createVM(1, 1, 10, 0, true) as VM;
     vm.setPoweredOn(true);
   }
 
@@ -95,8 +100,32 @@ class Game {
     return this.money;
   }
 
+  public getMaxCPU(): number {
+    return this.MaxCPU;
+  }
+
+  public getMaxMemory(): number {
+    return this.MaxMemory;
+  }
+
+  public getMaxStorage(): number {
+    return this.MaxStorage;
+  }
+
   public increaseTrafficPerSec(amount: number): void {
     this.trafficPerSec += amount;
+  }
+
+  public increaseServerCPU(amount: number): void {
+    this.MaxCPU += amount;
+  }
+
+  public increaseServerMemory(amount: number): void {
+    this.MaxMemory += amount;
+  }
+
+  public increaseServerStorage(amount: number): void {
+    this.MaxStorage += amount;
   }
 
   public generateTraffic(): void {
@@ -105,7 +134,7 @@ class Game {
     }
 
     const trafficPerTick = this.trafficPerSec / 10;
-    
+
     this.partialTrafficCounter += trafficPerTick;
 
     if (this.partialTrafficCounter >= 1) {

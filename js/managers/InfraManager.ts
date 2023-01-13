@@ -177,7 +177,7 @@ class InfraManager extends BaseManager {
     document.querySelector('.game .infrastructure .container').innerHTML = container;
   }
 
-  public getNextDataCenterName(): String | null {
+  public getNextDataCenterName(): String {
     let serverNames: Array<String> = [];
 
     this.datacenters.forEach(dc => serverNames.push(dc.getName()));
@@ -188,10 +188,10 @@ class InfraManager extends BaseManager {
       }
     }
 
-    return null;
+    return "null";
   }
 
-  public getNextRackName(): String | null {
+  public getNextRackName(): String {
     let serverNames: Array<String> = [];
 
     this.datacenters.forEach(dc => {
@@ -204,10 +204,10 @@ class InfraManager extends BaseManager {
       }
     }
 
-    return null;
+    return "null";
   }
 
-  public getNextServerName(): String | null {
+  public getNextServerName(): String {
     let serverNames: Array<String> = [];
 
     this.datacenters.forEach(dc => {
@@ -222,10 +222,10 @@ class InfraManager extends BaseManager {
       }
     }
 
-    return null;
+    return "null";
   }
 
-  public getNextVmName(vmType: VM_TYPES): String | null {
+  public getNextVmName(vmType: VM_TYPES): String {
     let vmNames: Array<String> = [];
 
     this.datacenters.forEach(dc => {
@@ -242,7 +242,7 @@ class InfraManager extends BaseManager {
       }
     }
 
-    return null;
+    return "null";
   }
 
   private zeroPad(num: number, places: number): String {

@@ -29,18 +29,20 @@ class Server extends BaseObject {
     this.name = savedServer.name;
 
     savedServer.vms.forEach(savedVm => {
-      const vm = this.createVM(savedVm.cpus, savedVm.memory, savedVm.storage, savedVm.type);
+      const vm: VM = this.createVM(savedVm.cpus, savedVm.memory, savedVm.storage, savedVm.type, true) as VM;
       vm.load(savedVm);
     });
   }
 
-  public createVM(cpus: number, memory: number, storage: number, type: VM_TYPES): VM {
-    if ((this.getAllocatedCpus() + cpus) > MAX_CPU) {
-      return null;
-    } else if ((this.getAllocatedMemory() + memory) > MAX_MEM) {
-      return null;
-    } else if ((this.getAllocatedStorage() + storage) > MAX_STORAGE) {
-      return null;
+  public createVM(cpus: number, memory: number, storage: number, type: VM_TYPES, CheckOverride: boolean | null | void): VM | null {
+    if (!CheckOverride) {
+      if ((this.getAllocatedCpus() + cpus) > this.game.getMaxCPU()) {
+        return null;
+      } else if ((this.getAllocatedMemory() + memory) > this.game.getMaxMemory()) {
+        return null;
+      } else if ((this.getAllocatedStorage() + storage) > this.game.getMaxStorage()) {
+        return null;
+      }
     }
 
     const vm = new VM(this.game, this);
@@ -58,7 +60,9 @@ class Server extends BaseObject {
     const newAllocatedMemory = (this.getAllocatedMemory() - vm.getAllocatedMemory()) + memory;
     const newAllocatedStorage = (this.getAllocatedStorage() - vm.getAllocatedStorage()) + storage;
 
-    if (newAllocatedCpus > MAX_CPU || newAllocatedMemory > MAX_MEM || newAllocatedStorage > MAX_STORAGE) {
+    if (newAllocatedCpus > this.game.getMaxCPU() ||
+      newAllocatedMemory > this.game.getMaxMemory() ||
+      newAllocatedStorage > this.game.getMaxStorage()) {
       return false;
     }
 
@@ -92,15 +96,15 @@ class Server extends BaseObject {
   }
 
   public getCpuUsage(): String {
-    return `${this.getAllocatedCpus()}/${MAX_CPU}`;
+    return `${this.getAllocatedCpus()}/${this.game.getMaxCPU()}`;
   }
 
   public getMemoryUsage(): String {
-    return `${this.getAllocatedMemory()}GB/${MAX_MEM}GB`;
+    return `${this.getAllocatedMemory()}GB/${this.game.getMaxMemory()}GB`;
   }
 
   public getStorageUsage(): String {
-    return `${this.getAllocatedStorage()}GB/${MAX_STORAGE}GB`;
+    return `${this.getAllocatedStorage()}GB/${this.game.getMaxStorage()}GB`;
   }
 
   public getName(): String {
