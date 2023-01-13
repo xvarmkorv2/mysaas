@@ -231,11 +231,11 @@ class VM extends BaseObject {
 
   private lowerResourceUsage(): void {
     if (this.currentLoad > this.startingLoad) {
-      this.currentLoad -= (0.01 * this.currentLoad);
+      this.currentLoad -= ((this.type == VM_TYPES.CDN ? 0.02 : 0.01) * this.currentLoad);
       this.game.infraManager.renderInfrastructureView();
     }
     if (this.currentMemory > this.startingMemory) {
-      this.currentMemory -= (0.01 * this.currentMemory);
+      this.currentMemory -= ((this.type == VM_TYPES.CDN ? 0.03 : 0.01) * this.currentMemory);
       this.game.infraManager.renderInfrastructureView();
     }
   }

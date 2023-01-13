@@ -134,6 +134,9 @@ class InfraManager extends BaseManager {
     this.datacenters.forEach(dc => {
       container += `<div class="datacenter-name">${dc.getName()}`;
       container += `<span class="specs">[ Racks: ${dc.getRacks().length} ]</span></div>`;
+      container += `<div class="datacenter">`;
+      container += `<div class="datacenter empty" onmousedown="Game.eventManager.emit('create_rack', '${dc.getName()}')">+</div>`;
+      container += `</div>`;
     });
     container += `</div>`;
     container += "<div class=\"dc empty\" onmousedown=\"Game.eventManager.emit('create_dc', '" + "OwO" + "')\">+</div>";

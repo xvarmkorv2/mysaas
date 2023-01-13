@@ -388,11 +388,11 @@ System.register("VM", ["BaseObject"], function (exports_5, context_5) {
                 };
                 VM.prototype.lowerResourceUsage = function () {
                     if (this.currentLoad > this.startingLoad) {
-                        this.currentLoad -= (0.01 * this.currentLoad);
+                        this.currentLoad -= ((this.type == VM_TYPES.CDN ? 0.02 : 0.01) * this.currentLoad);
                         this.game.infraManager.renderInfrastructureView();
                     }
                     if (this.currentMemory > this.startingMemory) {
-                        this.currentMemory -= (0.01 * this.currentMemory);
+                        this.currentMemory -= ((this.type == VM_TYPES.CDN ? 0.03 : 0.01) * this.currentMemory);
                         this.game.infraManager.renderInfrastructureView();
                     }
                 };
@@ -435,7 +435,9 @@ System.register("managers/EventManager", ["managers/BaseManager", "VM"], functio
                             this.handleToggleVmPower(eventParameter);
                             break;
                         case 'create_dc':
-                            //this.handleCreateDc(eventParameter);
+                            this.handleCreateDatacenter(eventParameter);
+                        case 'create_rack':
+                            this.handleCreateRack(eventParameter);
                             break;
                         case 'delete_vm':
                             this.handleDeleteVm(eventParameter);
@@ -951,6 +953,9 @@ System.register("managers/InfraManager", ["managers/BaseManager", "DataCenter", 
                     this.datacenters.forEach(function (dc) {
                         container += "<div class=\"datacenter-name\">".concat(dc.getName());
                         container += "<span class=\"specs\">[ Racks: ".concat(dc.getRacks().length, " ]</span></div>");
+                        container += "<div class=\"datacenter\">";
+                        container += "<div class=\"datacenter empty\" onmousedown=\"Game.eventManager.emit('create_rack', '".concat(dc.getName(), "')\">+</div>");
+                        container += "</div>";
                     });
                     container += "</div>";
                     container += "<div class=\"dc empty\" onmousedown=\"Game.eventManager.emit('create_dc', '" + "OwO" + "')\">+</div>";

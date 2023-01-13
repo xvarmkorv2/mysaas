@@ -268,6 +268,22 @@ body {
   border: 1px dashed rgb(114, 114, 114);
 }
 */
+.root .game .infrastructure .datacenter.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;
+  color: rgb(110, 110, 110);
+  border: 1px dashed #444;
+  min-width: 25px;
+  min-height: 20px;
+}
+
+.root .game .infrastructure .datacenter.empty:hover {
+  cursor: pointer;
+  color: rgb(145, 145, 145);
+  border: 1px dashed rgb(114, 114, 114);
+}
 
 .root .game .infrastructure .server .vm.empty {
   display: flex;

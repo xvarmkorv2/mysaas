@@ -16,7 +16,9 @@ class EventManager extends BaseManager {
         this.handleToggleVmPower(eventParameter);
         break;
       case 'create_dc':
-        //this.handleCreateDc(eventParameter);
+        this.handleCreateDatacenter(eventParameter);
+      case 'create_rack':
+        this.handleCreateRack(eventParameter);
         break;
       case 'delete_vm':
         this.handleDeleteVm(eventParameter);
