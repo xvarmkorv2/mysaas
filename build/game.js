@@ -1362,11 +1362,11 @@ System.register("managers/ShopManager", ["managers/BaseManager", "ShopItem"], fu
                     this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS, 'Fiberoptic', 9000, 'This upgrade increases upload and Download speed faster, making recieving traffic faster.', eth, 'traffic:+12', ['Ethernet']));
                     //components II
                     //memory
-                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS2, 'More Sticks of RAM', 12000, 'This upgrade allows you to have a max of 64gbs of ram.', 'fas fa-microchip', 'ram:+32', ['New CPUs III']));
+                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS2, 'More Sticks of RAM', 12000, 'This upgrade allows you to have a max of 64gbs of ram.', 'fas fa-microchip', 'ram:+32', ['New CPUs II']));
                     this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS2, 'More Sticks of RAM II', 24000, 'This upgrade allows you to have a max of 128gbs of ram', 'fas fa-microchip', 'ram:+64', ['More Sticks of RAM']));
                     this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS2, 'More Sticks of RAM III', 48000, 'This upgrade allows you to have a max of 256gbs of ram', 'fas fa-microchip', 'ram:+128', ['More Sticks of RAM II']));
                     //storage
-                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS2, 'More Hardrives', 24000, 'This upgrade allows you to have a max of 200gbs of storage.', 'fas fa-microchip', 'storage:+100', ['More Sticks of RAM III']));
+                    this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS2, 'More Hardrives', 24000, 'This upgrade allows you to have a max of 200gbs of storage.', 'fas fa-microchip', 'storage:+100', ['More Sticks of RAM']));
                     this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS2, 'More Hardrives II', 12000, 'This upgrade allows you to have a max of 400gbs of storage.', 'fas fa-microchip', 'storage:+200', ['More Hardrives']));
                     this.items.push(new ShopItem_1["default"](this, ShopItem_1.SHOP_CATEGORY.COMPONENTS2, 'More Hardrives III', 16000, 'This upgrade allows you to have a max of 1000gbs of storage.', 'fas fa-microchip', 'storage:+600', ['More Hardrives II']));
                 };
@@ -1473,6 +1473,9 @@ System.register("game", ["managers/EventManager", "managers/InfraManager", "mana
                         lastSaveTime: Date.now(),
                         infrastructure: this.infraManager.save(),
                         visitCount: this.visitCount,
+                        maxCPU: this.MaxCPU,
+                        maxMemory: this.MaxMemory,
+                        maxStorage: this.MaxStorage,
                         money: this.money,
                         moneyPerHit: this.moneyPerHit,
                         shop: this.shopManager.save(),
@@ -1485,6 +1488,9 @@ System.register("game", ["managers/EventManager", "managers/InfraManager", "mana
                         var savedGame = JSON.parse(localStorage.getItem('savedGame'));
                         this.increaseHitCounter(savedGame.visitCount);
                         this.giveMoney(savedGame.money);
+                        this.MaxCPU = savedGame.maxCPU || this.MaxCPU;
+                        this.MaxMemory = savedGame.maxMemory || this.MaxMemory;
+                        this.MaxStorage = savedGame.maxStorage || this.MaxStorage;
                         this.moneyPerHit = savedGame.moneyPerHit;
                         this.trafficPerSec = savedGame.trafficPerSec;
                         this.infraManager.load(savedGame.infrastructure);

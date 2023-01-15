@@ -6,7 +6,7 @@ export enum SHOP_CATEGORY {
   GENERAL,
   MARKETING,
   COMPONENTS,
-  COMPONENTS2,
+  COMPONENTS2
 }
 
 export enum ITEM_EFFECT {

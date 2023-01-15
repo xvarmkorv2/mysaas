@@ -44,11 +44,11 @@ class ShopManager extends BaseManager {
     this.items.push(new ShopItem(this, SHOP_CATEGORY.COMPONENTS, 'Fiberoptic', 9000, 'This upgrade increases upload and Download speed faster, making recieving traffic faster.', eth, 'traffic:+12', ['Ethernet']));
     //components II
     //memory
-    this.items.push(new ShopItem(this, SHOP_CATEGORY.COMPONENTS2, 'More Sticks of RAM', 12000, 'This upgrade allows you to have a max of 64gbs of ram.', 'fas fa-microchip', 'ram:+32', ['New CPUs III']));
+    this.items.push(new ShopItem(this, SHOP_CATEGORY.COMPONENTS2, 'More Sticks of RAM', 12000, 'This upgrade allows you to have a max of 64gbs of ram.', 'fas fa-microchip', 'ram:+32', ['New CPUs II']));
     this.items.push(new ShopItem(this, SHOP_CATEGORY.COMPONENTS2, 'More Sticks of RAM II', 24000, 'This upgrade allows you to have a max of 128gbs of ram', 'fas fa-microchip', 'ram:+64', ['More Sticks of RAM']));
     this.items.push(new ShopItem(this, SHOP_CATEGORY.COMPONENTS2, 'More Sticks of RAM III', 48000, 'This upgrade allows you to have a max of 256gbs of ram', 'fas fa-microchip', 'ram:+128', ['More Sticks of RAM II']));
     //storage
-    this.items.push(new ShopItem(this, SHOP_CATEGORY.COMPONENTS2, 'More Hardrives', 24000, 'This upgrade allows you to have a max of 200gbs of storage.', 'fas fa-microchip', 'storage:+100', ['More Sticks of RAM III']));
+    this.items.push(new ShopItem(this, SHOP_CATEGORY.COMPONENTS2, 'More Hardrives', 24000, 'This upgrade allows you to have a max of 200gbs of storage.', 'fas fa-microchip', 'storage:+100', ['More Sticks of RAM']));
     this.items.push(new ShopItem(this, SHOP_CATEGORY.COMPONENTS2, 'More Hardrives II', 12000, 'This upgrade allows you to have a max of 400gbs of storage.', 'fas fa-microchip', 'storage:+200', ['More Hardrives']));
     this.items.push(new ShopItem(this, SHOP_CATEGORY.COMPONENTS2, 'More Hardrives III', 16000, 'This upgrade allows you to have a max of 1000gbs of storage.', 'fas fa-microchip', 'storage:+600', ['More Hardrives II']));
   }

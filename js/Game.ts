@@ -43,6 +43,9 @@ class Game {
       lastSaveTime: Date.now(),
       infrastructure: this.infraManager.save(),
       visitCount: this.visitCount,
+      maxCPU: this.MaxCPU,
+      maxMemory: this.MaxMemory,
+      maxStorage: this.MaxStorage,
       money: this.money,
       moneyPerHit: this.moneyPerHit,
       shop: this.shopManager.save(),
@@ -57,6 +60,9 @@ class Game {
       const savedGame: ISavedGame = JSON.parse(localStorage.getItem('savedGame') as string);
       this.increaseHitCounter(savedGame.visitCount);
       this.giveMoney(savedGame.money);
+      this.MaxCPU = savedGame.maxCPU || this.MaxCPU
+      this.MaxMemory = savedGame.maxMemory || this.MaxMemory
+      this.MaxStorage = savedGame.maxStorage || this.MaxStorage
       this.moneyPerHit = savedGame.moneyPerHit;
       this.trafficPerSec = savedGame.trafficPerSec;
       this.infraManager.load(savedGame.infrastructure);

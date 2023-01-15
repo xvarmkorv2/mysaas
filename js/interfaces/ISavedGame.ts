@@ -53,5 +53,8 @@ export default interface ISavedGame {
   money: number,
   moneyPerHit: number,
   shop: ISavedShop,
-  trafficPerSec: number
+  trafficPerSec: number,
+  maxCPU: number,
+  maxMemory: number,
+  maxStorage: number
 }
